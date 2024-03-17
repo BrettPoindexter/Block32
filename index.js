@@ -8,6 +8,18 @@ const client = new pg.Client(process.env.DATABASE_URL || 'postgres://localhost/a
 app.use(express.json());
 app.use(require('morgan')('dev'));
 
+app.get('/api/flavors', async (req, res, next) => {
+    try {
+        const SQL = /*sql*/ `
+            SELECT * FROM flavors ORDER BY created_at DESC;
+        `;
+        const response = await client.query(SQL);
+        res.send(response.rows);
+    } catch (err) {
+        next(err);
+    }
+})
+
 const init = async () => {
     await client.connect();
     let SQL = /*sql*/ `
