@@ -18,6 +18,60 @@ app.get('/api/flavors', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+});
+
+app.get('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const SQL = `
+            SELECT * FROM flavors WHERE id=$1;
+        `;
+        const response = await client.query(SQL, [req.params.id]);
+        res.send(response.rows[0]);
+    } catch (err) {
+        next(err);
+    }
+});
+
+app.post('/api/flavors', async (req, res, next) => {
+    try {
+        const SQL = `
+            INSERT INTO flavors (id, name, is_favorite, created_at)
+            VALUES ($1, $2, $3, now())
+            RETURNING *;
+        `;
+        const response = await client.query(SQL, [req.body.id, req.body.name, req.body.is_favorite]);
+        res.status(201).json(response.rows[0]);
+    } catch (err) {
+        next(err);
+    }
+});
+
+app.delete('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const SQL = `
+            DELETE FROM flavors
+            WHERE id=$1;
+        `;
+        const response = client.query(SQL, [req.params.id]);
+        res.sendStatus(204);
+    } catch (err) {
+        next(err);
+    }
+});
+
+app.put('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const SQL = `
+            UPDATE flavors
+            SET name=$1, is_favorite=$2, updated_at=now()
+            WHERE id=$3
+            RETURNING *;
+        `;
+        const response = await client.query(SQL, [req.body.name, req.body.is_favorite, req.params.id]);
+        res.send(response.rows[0]);
+    } catch (err) {
+        next(err);
+    }
 })
 
 const init = async () => {
